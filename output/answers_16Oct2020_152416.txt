@@ -1,0 +1,5 @@
+01_10_bin.graph 0 4
+02_10_bin.graph 0 1
+03_10_bin.graph 0 6
+04_10_bin.graph 2 6
+05_10_bin.graph 0 1

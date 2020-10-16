@@ -3,11 +3,16 @@ import networkx as nx
 import numpy as np
 from itertools import chain, combinations
 
+class Printer():
+    """Print things to stdout on one line dynamically"""
+    def __init__(self,data):
+        sys.stdout.write("\r\x1b[K"+data.__str__())
+        sys.stdout.flush()
 
 def create_node_edges(graph):
     node_2_edge = dict()
     for node in graph.nodes:
-        node_2_edge[node] = []
+        node_2_edge[node] = [node]
 
     for edge in graph.edges:
         origin = edge[0]
@@ -22,24 +27,38 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
 def check_is_dominant(subnodes, node_2_edges):
+    global graph_nodes_len
+    global graph_nodes 
 
     reachable = dict()
-    graph_nodes = list(node_2_edges.keys())
-    need_to_visit = len(graph_nodes) - 1
     for node in graph_nodes:
         reachable[node] = 0
 
+    visited = 0
     for node in subnodes:
+        if visited == graph_nodes_len:
+            break
+
         destinations = node_2_edges[node]
         for destination in destinations:
             if reachable[destination] == 0:
                 reachable[destination] = 1
-                need_to_visit -= 1
+                visited += 1
 
-    return False if need_to_visit > 0 else True
+    return False if visited != graph_nodes_len  else True
+
+def faster_check_is_dominant(subnodes, node_2_edges):
+    all_destinations = set()
+    for node in subnodes:
+        all_destinations.update(set(node_2_edges[node]))
+        
+    return False if len(all_destinations) != graph_nodes_len else True
 
 
-global counter = 0
+counter = 0
+graph_nodes = None
+graph_nodes_len = 0
+
 
 def dominant(graph):
     """
@@ -51,26 +70,46 @@ def dominant(graph):
 
     """
 
-    print(" [x] Graph number", counter)
+    global counter
+    global graph_nodes
+    global graph_nodes_len
+
+    print(" [x] Graph number", counter, end='')
     counter += 1
+
     smallest_comb_size = np.inf
     smallest_comb = None
+
     node_2_edges = create_node_edges(graph)
     
+    graph_nodes = list(node_2_edges.keys())
+    graph_nodes_len = len(graph_nodes)
+
     #print(" [.] Nodes 2 edges ", node_2_edges)
+    print(" Number of nodes: ", graph_nodes_len)
    
     node_combinations = powerset(graph.nodes)
+    total_combinations = 2 ** graph_nodes_len
 
+    #print(" [.] Power set size: ", total_combinations)
+
+    it = 0
     for node_comb in node_combinations:
         comb_size = len(node_comb)
-        if comb_size > smallest_comb_size: # there's no need to test because it can't update smallest_comb
+        output = " [x] Try number #" + str(it) + " of #" + str(total_combinations) + ". Best result: " + str(smallest_comb_size) + " and Combination size: " + str(comb_size) + "."
+        it += 1
+        Printer(output)
+        
+        if comb_size >= smallest_comb_size: # there's no need to test because it can't update smallest_comb
             break
 
-        if check_is_dominant(node_comb, node_2_edges):
+        #if check_is_dominant(node_comb, node_2_edges):
+        if faster_check_is_dominant(node_comb, node_2_edges):
             if comb_size < smallest_comb_size:
                 smallest_comb_size = comb_size
                 smallest_comb = node_comb
 
+    print()
     #print(" [.] Smallest combination: ", smallest_comb)
     #print(" [.] Smallest combination size: ", smallest_comb_size)
     return smallest_comb

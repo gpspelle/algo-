@@ -59,8 +59,47 @@ counter = 0
 graph_nodes = None
 graph_nodes_len = 0
 
+def get_most_central(node_2_edges):
+
+    biggest = -np.inf
+    central_node = None
+
+    for node in node_2_edges.keys():
+        size = len(node_2_edges[node]) 
+        if size > biggest:
+            central_node = node
+            biggest = size
+
+    return node_2_edges.pop(central_node), central_node
 
 def dominant(graph):
+    """
+        A Faire:         
+        - Ecrire une fonction qui retourne le dominant du graphe non dirigé g passé en parametre.
+        - cette fonction doit retourner la liste des noeuds d'un petit dominant de g
+
+        :param g: le graphe est donné dans le format networkx : https://networkx.github.io/documentation/stable/reference/classes/graph.html
+
+    """
+    global graph_nodes
+    global graph_nodes_len
+
+    graph_nodes = graph.nodes
+    graph_nodes_len = len(graph_nodes)
+    found_nodes = set()
+    best_nodes = []
+
+    node_2_edges = create_node_edges(graph)
+
+    while len(found_nodes) < graph_nodes_len:
+        best_node_neighbors, central_node = get_most_central(node_2_edges)
+        found_nodes.update(best_node_neighbors)
+        best_nodes.append(central_node)
+
+    return best_nodes
+
+
+def dominant_brute_force(graph):
     """
         A Faire:         
         - Ecrire une fonction qui retourne le dominant du graphe non dirigé g passé en parametre.
@@ -82,7 +121,7 @@ def dominant(graph):
 
     node_2_edges = create_node_edges(graph)
     
-    graph_nodes = list(node_2_edges.keys())
+    graph_nodes = graph.nodes
     graph_nodes_len = len(graph_nodes)
 
     #print(" [.] Nodes 2 edges ", node_2_edges)

@@ -49,31 +49,31 @@ def create_node_edges(graph):
     return node_2_edges_
 
 
+
 def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
+def check_is_dominant(subnodes, node_2_edges):
+    global graph_nodes_len
+    global graph_nodes 
 
-#def check_is_dominant(subnodes, node_2_edges):
-#    global graph_nodes_len
-#    global graph_nodes 
-#
-#    reachable = dict()
-#    for node in graph_nodes:
-#        reachable[node] = 0
-#
-#    visited = 0
-#    for node in subnodes:
-#        if visited == graph_nodes_len:
-#            break
-#
-#        destinations = node_2_edges[node]
-#        for destination in destinations:
-#            if reachable[destination] == 0:
-#                reachable[destination] = 1
-#                visited += 1
-#
-#    return False if visited != graph_nodes_len  else True
+    reachable = dict()
+    for node in graph_nodes:
+        reachable[node] = 0
+
+    visited = 0
+    for node in subnodes:
+        if visited == graph_nodes_len:
+            break
+
+        destinations = node_2_edges[node]
+        for destination in destinations:
+            if reachable[destination] == 0:
+                reachable[destination] = 1
+                visited += 1
+
+    return False if visited != graph_nodes_len  else True
 
 
 def faster_check_is_dominant(subnodes, node_2_edges):
@@ -178,7 +178,7 @@ def dominant_brute_force(graph):
     global graph_nodes
     global graph_nodes_len
 
-    #print(" [x] Graph number", counter, end='')
+    print(" [x] Graph number", counter, end='')
     counter += 1
 
     smallest_comb_size = np.inf
@@ -197,16 +197,20 @@ def dominant_brute_force(graph):
 
     #print(" [.] Power set size: ", total_combinations)
 
-    #it = 0
+    it = 0
     for node_comb in node_combinations:
         comb_size = len(node_comb)
-        #output = " [x] Try number #" + str(it) + " of #" + str(total_combinations) + ". Best result: " + str(smallest_comb_size) + " and Combination size: " + str(comb_size) + "."
-        #it += 1
-        #Printer(output)
+        output = " [x] Try number #" + str(it) + " of #" + str(total_combinations) + ". Best result: " + str(smallest_comb_size) + " and Combination size: " + str(comb_size) + "."
+        it += 1
+        Printer(output)
+
+        if comb_size > 5:
+            return []
 
         if comb_size >= smallest_comb_size: # there's no need to test because it can't update smallest_comb
             break
 
+        #if check_is_dominant(node_comb, node_2_edges):
         if faster_check_is_dominant(node_comb, node_2_edges):
             if comb_size < smallest_comb_size:
                 smallest_comb_size = comb_size
@@ -243,7 +247,7 @@ if __name__=="__main__":
         g = nx.read_adjlist(os.path.join(input_dir, graph_filename))
         
         # calcul du dominant
-        D = sorted(dominant(g), key=lambda x: int(x))
+        D = sorted(dominant_brute_force(g), key=lambda x: int(x))
 
         # ajout au rapport
         output_file.write(graph_filename)

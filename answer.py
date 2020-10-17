@@ -204,7 +204,7 @@ def dominant_brute_force(graph):
         it += 1
         Printer(output)
 
-        if comb_size > 5:
+        if comb_size >= 5:
             return []
 
         if comb_size >= smallest_comb_size: # there's no need to test because it can't update smallest_comb

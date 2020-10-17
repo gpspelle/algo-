@@ -49,6 +49,19 @@ def create_node_edges(graph):
     return node_2_edges_
 
 
+def improve_answer(best_nodes, node_2_edges, start, end):
+
+    if start >= end:
+        return best_nodes
+
+    middle = (start + end) // 2
+    for comb in combinations(best_nodes, middle):
+        if faster_check_is_dominant(comb, node_2_edges):
+            return comb
+
+    return improve_answer(best_nodes, node_2_edges, middle+1, end)
+
+
 def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
@@ -84,8 +97,6 @@ def faster_check_is_dominant(subnodes, node_2_edges):
     return False if len(all_destinations) != graph_nodes_len else True
 
 
-counter = 0
-graph_nodes = None
 graph_nodes_len = 0
 
 def get_most_central(node_2_edges, found_nodes):
@@ -106,33 +117,32 @@ def get_most_central(node_2_edges, found_nodes):
     return node_2_edges.pop(central_node), central_node
 
 
-def stupid_greedy_dominant(graph):
-    """
-        A Faire:         
-        - Ecrire une fonction qui retourne le dominant du graphe non dirigé g passé en parametre.
-        - cette fonction doit retourner la liste des noeuds d'un petit dominant de g
+#def stupid_greedy_dominant(graph):
+#    """
+#        A Faire:         
+#        - Ecrire une fonction qui retourne le dominant du graphe non dirigé g passé en parametre.
+#        - cette fonction doit retourner la liste des noeuds d'un petit dominant de g
+#
+#        :param g: le graphe est donné dans le format networkx : https://networkx.github.io/documentation/stable/reference/classes/graph.html
+#
+#    """
+#    global graph_nodes_len
+#
+#    graph_nodes = graph.nodes
+#    graph_nodes_len = len(graph_nodes)
+#    found_nodes = set()
+#    best_nodes = []
+#
+#    node_2_edges = create_node_edges(graph)
+#
+#    while len(found_nodes) < graph_nodes_len:
+#        best_node_neighbors, central_node = get_most_central(node_2_edges)
+#        found_nodes.update(best_node_neighbors)
+#        best_nodes.append(central_node)
+#
+#    return best_nodes
 
-        :param g: le graphe est donné dans le format networkx : https://networkx.github.io/documentation/stable/reference/classes/graph.html
-
-    """
-    global graph_nodes
-    global graph_nodes_len
-
-    graph_nodes = graph.nodes
-    graph_nodes_len = len(graph_nodes)
-    found_nodes = set()
-    best_nodes = []
-
-    node_2_edges = create_node_edges(graph)
-
-    while len(found_nodes) < graph_nodes_len:
-        best_node_neighbors, central_node = get_most_central(node_2_edges)
-        found_nodes.update(best_node_neighbors)
-        best_nodes.append(central_node)
-
-    return best_nodes
-
-
+#counter = 0
 def dominant(graph):
     """
         A Faire:         
@@ -142,11 +152,12 @@ def dominant(graph):
         :param g: le graphe est donné dans le format networkx : https://networkx.github.io/documentation/stable/reference/classes/graph.html
 
     """
-    global graph_nodes
     global graph_nodes_len
+    #global counter
 
-    graph_nodes = graph.nodes
-    graph_nodes_len = len(graph_nodes)
+    #print(" [x] Graph number", counter)
+    #counter += 1
+    graph_nodes_len = len(graph.nodes)
 
     if graph_nodes_len <= 10:
         return dominant_brute_force(graph)
@@ -161,9 +172,24 @@ def dominant(graph):
         found_nodes.update(best_node_neighbors)
         best_nodes.append(central_node)
 
+    #print(" [.] Found: ", best_nodes)
+    #print(" [.] Found: ", len(best_nodes))
+    if len(best_nodes) <= 6:
+        return dominant_brute_force(graph) # okay, found a small answer, let's try to improve it with bruteforce
+    elif len(best_nodes) >= 30:
+        return best_nodes
+
+    node_2_edges = brute_force_create_node_edges(graph)
+
+    #print(" [.] Binary search size: ", len(best_nodes))
+    #print(" [.] Best node size before: ", len(best_nodes), end='')
+    best_nodes = improve_answer(best_nodes, node_2_edges, 0, len(best_nodes)) 
+    #print(" - Best node size after: ", len(best_nodes))
+
     return best_nodes
 
 
+#counter = 0
 def dominant_brute_force(graph):
     """
         A Faire:         
@@ -174,20 +200,18 @@ def dominant_brute_force(graph):
 
     """
 
-    global counter
-    global graph_nodes
     global graph_nodes_len
+    #global counter
 
-    #print(" [x] Graph number", counter, end='')
-    counter += 1
+    #print(" [x] Graph number", counter)
+    #counter += 1
 
     smallest_comb_size = np.inf
     smallest_comb = []
 
     node_2_edges = brute_force_create_node_edges(graph)
     
-    graph_nodes = graph.nodes
-    graph_nodes_len = len(graph_nodes)
+    graph_nodes_len = len(graph.nodes)
 
     #print(" [.] Nodes 2 edges ", node_2_edges)
     #print(" Number of nodes: ", graph_nodes_len)

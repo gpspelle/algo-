@@ -1,0 +1,20 @@
+01_10_bin.graph 4 6
+02_10_bin.graph 0 1
+03_10_bin.graph 1 6
+04_10_bin.graph 3 4
+05_10_bin.graph 1 8
+06_50_bin.graph 0 1 14
+07_50_bin.graph 5 27 36
+08_50_bin.graph 1 7 18
+09_50_bin.graph 0 18 33
+10_50_bin.graph 2 26 48
+11_100_bin.graph 0 1 4 7
+12_100_bin.graph 3 10 79
+13_100_bin.graph 3 68 93
+14_100_bin.graph 0 1 6 46
+15_100_bin.graph 0 2 3 77
+16_10_paw.graph 0 3
+17_10_paw.graph 0 1 4
+18_10_paw.graph 0 2
+19_10_paw.graph 2 3
+20_10_paw.graph 2 3

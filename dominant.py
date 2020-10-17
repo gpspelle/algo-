@@ -12,44 +12,59 @@ class Printer():
 def brute_force_create_node_edges(graph):
     node_2_edges = dict()
     for node in graph.nodes:
-        node_2_edges[node] = [node]
+        node_2_edges[node] = set([node])
 
     for edge in graph.edges:
         origin = edge[0]
         destination = edge[1]
-        node_2_edges[origin].append(destination)
-        node_2_edges[destination].append(origin)
+        node_2_edges[origin].update([destination])
+        node_2_edges[destination].update([origin])
 
     return node_2_edges
 
 def create_node_edges(graph):
     node_2_edges = dict()
-    node_2_edges_ = dict()
     for node in graph.nodes:
-        node_2_edges[node] = [node]
-        node_2_edges_[node] = [node]
+        node_2_edges[node] = set([node])
 
     for edge in graph.edges:
         origin = edge[0]
         destination = edge[1]
-        node_2_edges[origin].append(destination)
-        node_2_edges[destination].append(origin)
-        node_2_edges_[origin].append(destination)
-        node_2_edges_[destination].append(origin)
+        node_2_edges[origin].update([destination])
+        node_2_edges[destination].update([origin])
+    
 
+    node_2_edges_ = node_2_edges.copy()
     for node0 in node_2_edges.keys():
+        node0_set = node_2_edges[node0]
         for node1 in node_2_edges.keys():
+            node1_set = node_2_edges[node1]
             if node0 == node1:
                 continue
 
             if node0 in node_2_edges_ and node1 in node_2_edges_:
-                if set(node_2_edges[node1]) <= set(node_2_edges[node0]):
+                if node1_set <= node0_set:
                     node_2_edges_.pop(node1)
 
+    '''
+    for node0 in node_2_edges.keys():
+        node0_set = set(node_2_edges[node0])
+        for node1 in node_2_edges.keys():
+            node1_set = set(node_2_edges[node1])
+            for node2 in node_2_edges.keys():
+                node2_set = set(node_2_edges[node2])
+                if node0 in node_2_edges_ and node1 in node_2_edges_ and node2 in node_2_edges_:
+                    combination = node1_set
+                    combination.update(node2_set)
+                    if combination <= node0_set:
+                        node_2_edges_.pop(node1)
+                        node_2_edges_.pop(node2)
+
+    '''
     return node_2_edges_
 
 
-def improve_answer(best_nodes, node_2_edges, start, end):
+def improve_answer_0(best_nodes, node_2_edges, start, end):
 
     if start >= end:
         return best_nodes
@@ -59,7 +74,36 @@ def improve_answer(best_nodes, node_2_edges, start, end):
         if faster_check_is_dominant(comb, node_2_edges):
             return comb
 
-    return improve_answer(best_nodes, node_2_edges, middle+1, end)
+    return improve_answer_0(best_nodes, node_2_edges, middle+1, end)
+
+def improve_answer_1(best_nodes, node_2_edges, size, best_comb):
+
+    for comb in combinations(best_nodes, size-1):
+        if faster_check_is_dominant(comb, node_2_edges):
+            best_comb = improve_answer_1(best_nodes, node_2_edges, size-1, comb)
+
+    return best_comb 
+
+
+def improve_answer_2(best_nodes, node_2_edges, graph_nodes):
+
+
+    best = list(best_nodes).copy()
+    for node0 in graph_nodes:
+        node0_set = node_2_edges[node0]
+        for node1 in best_nodes:
+            node1_set = node_2_edges[node1]
+            for node2 in best_nodes:
+                node2_set = node_2_edges[node2]
+                comb = node1_set.update(node2_set)
+
+                if comb and comb <= node0_set:
+                    if node1 in best:
+                        best.remove(node1)
+                    if node2 in best:
+                        best.remove(node2)
+
+    return best 
 
 
 def powerset(iterable):
@@ -67,32 +111,10 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
 
-#def check_is_dominant(subnodes, node_2_edges):
-#    global graph_nodes_len
-#    global graph_nodes 
-#
-#    reachable = dict()
-#    for node in graph_nodes:
-#        reachable[node] = 0
-#
-#    visited = 0
-#    for node in subnodes:
-#        if visited == graph_nodes_len:
-#            break
-#
-#        destinations = node_2_edges[node]
-#        for destination in destinations:
-#            if reachable[destination] == 0:
-#                reachable[destination] = 1
-#                visited += 1
-#
-#    return False if visited != graph_nodes_len  else True
-
-
 def faster_check_is_dominant(subnodes, node_2_edges):
     all_destinations = set()
     for node in subnodes:
-        all_destinations.update(set(node_2_edges[node]))
+        all_destinations.update(node_2_edges[node])
         
     return False if len(all_destinations) != graph_nodes_len else True
 
@@ -105,7 +127,7 @@ def get_most_central(node_2_edges, found_nodes):
     central_node = None
 
     for node in node_2_edges.keys():
-        node_neighbors = set(node_2_edges[node])
+        node_neighbors = node_2_edges[node]
 
         not_found = node_neighbors.difference(found_nodes)
         size = len(not_found)
@@ -116,31 +138,6 @@ def get_most_central(node_2_edges, found_nodes):
 
     return node_2_edges.pop(central_node), central_node
 
-
-#def stupid_greedy_dominant(graph):
-#    """
-#        A Faire:         
-#        - Ecrire une fonction qui retourne le dominant du graphe non dirigé g passé en parametre.
-#        - cette fonction doit retourner la liste des noeuds d'un petit dominant de g
-#
-#        :param g: le graphe est donné dans le format networkx : https://networkx.github.io/documentation/stable/reference/classes/graph.html
-#
-#    """
-#    global graph_nodes_len
-#
-#    graph_nodes = graph.nodes
-#    graph_nodes_len = len(graph_nodes)
-#    found_nodes = set()
-#    best_nodes = []
-#
-#    node_2_edges = create_node_edges(graph)
-#
-#    while len(found_nodes) < graph_nodes_len:
-#        best_node_neighbors, central_node = get_most_central(node_2_edges)
-#        found_nodes.update(best_node_neighbors)
-#        best_nodes.append(central_node)
-#
-#    return best_nodes
 
 #counter = 0
 def dominant(graph):
@@ -167,8 +164,11 @@ def dominant(graph):
 
     node_2_edges = create_node_edges(graph)
 
+    #print("Node 2 edges: ", node_2_edges)
+
     while len(found_nodes) < graph_nodes_len:
         best_node_neighbors, central_node = get_most_central(node_2_edges, found_nodes)
+        #print("len(found_nodes): ", len(found_nodes), "graph_nodes_len: ", graph_nodes_len)
         found_nodes.update(best_node_neighbors)
         best_nodes.append(central_node)
 
@@ -177,15 +177,20 @@ def dominant(graph):
     if len(best_nodes) <= 6:
         return dominant_brute_force(graph) # okay, found a small answer, let's try to improve it with bruteforce
     elif len(best_nodes) >= 30:
+        node_2_edges = brute_force_create_node_edges(graph)
+        #print(" [.] Best node size before: ", len(best_nodes), end='')
+        best_nodes = improve_answer_1(best_nodes, node_2_edges, len(best_nodes), best_nodes)
+        best_nodes = improve_answer_2(best_nodes, node_2_edges, graph.nodes)
+        #print(" - Best node size after: ", len(best_nodes))
         return best_nodes
 
     node_2_edges = brute_force_create_node_edges(graph)
 
     #print(" [.] Binary search size: ", len(best_nodes))
     #print(" [.] Best node size before: ", len(best_nodes), end='')
-    best_nodes = improve_answer(best_nodes, node_2_edges, 0, len(best_nodes)) 
-    #print(" - Best node size after: ", len(best_nodes))
+    best_nodes = improve_answer_0(best_nodes, node_2_edges, 0, len(best_nodes)) 
 
+    #print(" - Best node size after: ", len(best_nodes))
     return best_nodes
 
 
@@ -214,7 +219,8 @@ def dominant_brute_force(graph):
     graph_nodes_len = len(graph.nodes)
 
     #print(" [.] Nodes 2 edges ", node_2_edges)
-    #print(" Number of nodes: ", graph_nodes_len)
+    #print(" [.] Number of nodes: ", graph_nodes_len)
+    #print(" [.] Graph nodes: ", graph.nodes)
    
     node_combinations = powerset(graph.nodes)
     total_combinations = 2 ** graph_nodes_len

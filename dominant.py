@@ -85,23 +85,41 @@ def improve_answer_1(best_nodes, node_2_edges, size, best_comb):
     return best_comb 
 
 
+def improve_answer_3(graph_nodes, node_2_edges, size, best_nodes):
+
+    #it = 0
+    total_combinations = combinations(graph_nodes, size-1)
+    for comb in total_combinations:
+        #comb_size = len(comb)
+        #output = " [x] Try number #" + str(it) + " of #" + str(2**len(graph_nodes)) + " and Combination size: " + str(comb_size) + "."
+        #it += 1
+        #Printer(output)
+        if faster_check_is_dominant(comb, node_2_edges):
+            return comb
+
+    return best_nodes
+
+
 def improve_answer_2(best_nodes, node_2_edges, graph_nodes):
 
-
-    best = list(best_nodes).copy()
+    best = set(best_nodes).copy()
     for node0 in graph_nodes:
         node0_set = node_2_edges[node0]
         for node1 in best_nodes:
             node1_set = node_2_edges[node1]
             for node2 in best_nodes:
                 node2_set = node_2_edges[node2]
-                comb = node1_set.update(node2_set)
-
+                comb = node1_set.copy()
+                comb.update(node2_set)
+    
                 if comb and comb <= node0_set:
                     if node1 in best:
                         best.remove(node1)
                     if node2 in best:
                         best.remove(node2)
+
+                    best.update([node0])
+
 
     return best 
 
@@ -180,7 +198,6 @@ def dominant(graph):
         node_2_edges = brute_force_create_node_edges(graph)
         #print(" [.] Best node size before: ", len(best_nodes), end='')
         best_nodes = improve_answer_1(best_nodes, node_2_edges, len(best_nodes), best_nodes)
-        best_nodes = improve_answer_2(best_nodes, node_2_edges, graph.nodes)
         #print(" - Best node size after: ", len(best_nodes))
         return best_nodes
 

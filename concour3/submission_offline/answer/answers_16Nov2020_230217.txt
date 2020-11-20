@@ -1,0 +1,9 @@
+instance_N200_OPT214.inst: OK
+instance_N200_OPT290.inst: OK
+instance_N200_OPT3954.inst: OK
+instance_N250_OPT231.inst: OK
+instance_N250_OPT5038.inst: OK
+instance_N250_OPT6554.inst: OK
+instance_N250_OPT6743.inst: OK
+instance_N300_OPT200.inst: OK
+instance_N300_OPT6347.inst: OK

@@ -1,0 +1,9 @@
+instance_N200_OPT214.inst: KO expected: 214, found: 9613
+instance_N200_OPT290.inst: KO expected: 290, found: 15171
+instance_N200_OPT3954.inst: KO expected: 3954, found: 12231
+instance_N250_OPT231.inst: KO expected: 231, found: 13716
+instance_N250_OPT5038.inst: KO expected: 5038, found: 16064
+instance_N250_OPT6554.inst: KO expected: 6554, found: 17088
+instance_N250_OPT6743.inst: KO expected: 6743, found: 18878
+instance_N300_OPT200.inst: KO expected: 200, found: 7845
+instance_N300_OPT6347.inst: KO expected: 6347, found: 21580
